@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId // MongoDB requires @default(auto())
+  username       String   @unique
+  email          String   @unique
+  password       String
+  profilePicture String?  // Optional profile picture URL
+  status         String   @default("offline") // e.g., online/offline
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Embedded or referenced manually in documents if needed
+  chatRooms      Json?
+}
+
+// Message model
+model Message {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId // MongoDB requires @default(auto())
+  content    String
+  sentAt     DateTime @default(now())
+  senderId   String   @db.ObjectId
+  chatRoomId String   @db.ObjectId
+
+  // Optional JSON to store any additional metadata
+  metadata   Json?
+}
+
+// ChatRoom model
+model ChatRoom {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId // MongoDB requires @default(auto())
+  name      String?
+  createdAt DateTime @default(now())
+  messages  Json?    // Stores embedded message documents as JSON
+  users     Json?    // Stores embedded user documents or user IDs as JSON
+}
